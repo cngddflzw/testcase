@@ -19,14 +19,14 @@ public class NioServer {
     private AtomicInteger writeCount = new AtomicInteger(0);
 
     public NioServer(int port) throws IOException {
-        ServerSocketChannel ssc = ServerSocketChannel.open();
-        ssc.configureBlocking(false);
-        ssc.bind(new InetSocketAddress(port));
+        ServerSocketChannel ssc = ServerSocketChannel.open(); // 使用默认的selector provider生成一个channel
+        ssc.configureBlocking(false); // 设置为非阻塞模式
+        ssc.bind(new InetSocketAddress(port)); // 绑定到端口
         selector = Selector.open();
-        ssc.register(selector, SelectionKey.OP_ACCEPT);
+        ssc.register(selector, SelectionKey.OP_ACCEPT); // 将channel注册到selector, 并指定其兴趣集事件
 
-        while (selector.select() > 0) {
-            for (SelectionKey key : selector.selectedKeys()) {
+        while (selector.select() > 0) { // select()是个阻塞方法, 只有当selector中有已经准备好的事件的时候才会返回, 它返回已经准备好的事件数
+            for (SelectionKey key : selector.selectedKeys()) { // 遍历已经准备好的事件的key
                 selector.selectedKeys().remove(key);
                 if (key.isAcceptable()) {
                     System.out.println("Accept client " + acceptCount.incrementAndGet());
